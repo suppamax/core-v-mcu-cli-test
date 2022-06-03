@@ -99,9 +99,10 @@ uint16_t udma_uart_open (uint8_t uart_id, uint32_t xbaudrate) {
 	puart = (UdmaUart_t*)(UDMA_CH_ADDR_UART + uart_id * UDMA_CH_SIZE);
 	puart->uart_setup_b.div = (uint16_t)(5000000/xbaudrate);
 	puart->uart_setup_b.bits = 3; // 8-bits
-//	if (uart_id == 0) puart->uart_setup_b.rx_polling_en = 1;
+//	if (uart_id == 0)
+		puart->uart_setup_b.rx_polling_en = 1;
 //	if (uart_id == 1)
-		puart->irq_en_b.rx_irq_en = 1;
+//		puart->irq_en_b.rx_irq_en = 1;
 	puart->uart_setup_b.en_tx = 1;
 	puart->uart_setup_b.en_rx = 1;
 	puart->uart_setup_b.rx_clean_fifo = 1;
@@ -117,6 +118,12 @@ uint16_t udma_uart_open (uint8_t uart_id, uint32_t xbaudrate) {
 
 	return 0;
 }
+
+uint16_t udma_uart_flush (uint8_t uart_id) {
+	UdmaUart_t*				puart = (UdmaUart_t*)(UDMA_CH_ADDR_UART + uart_id * UDMA_CH_SIZE);
+	puart->uart_setup_b.rx_clean_fifo = 1;
+}
+
 
 uint16_t udma_uart_writeraw(uint8_t uart_id, uint16_t write_len, uint8_t* write_buffer) {
 	UdmaUart_t*				puart = (UdmaUart_t*)(UDMA_CH_ADDR_UART + uart_id * UDMA_CH_SIZE);
@@ -147,6 +154,22 @@ uint16_t udma_uart_read(uint8_t uart_id, uint16_t read_len, uint8_t* read_buffer
 			last_char = (uint8_t)(puart->data_b.rx_data & 0xff);
 			if (last_char == 0xd)  // if cr add
 				read_buffer[ret++] = 0xa;  // linefeed
+			read_buffer[ret++] = last_char;
+		}
+	}
+	read_buffer[ret] = '\0';
+	return ret--;
+}
+
+uint16_t udma_uart_read_mod(uint8_t uart_id, uint16_t read_len, uint8_t* read_buffer) {
+	uint16_t ret = 0;
+	uint8_t last_char = 0;
+	UdmaUart_t*				puart = (UdmaUart_t*)(UDMA_CH_ADDR_UART + uart_id * UDMA_CH_SIZE);
+
+
+	while ( (ret < (read_len - 2)) && (last_char != 0xa)) {
+		if (puart->valid_b.rx_data_valid == 1) {
+			last_char = (uint8_t)(puart->data_b.rx_data & 0xff);
 			read_buffer[ret++] = last_char;
 		}
 	}

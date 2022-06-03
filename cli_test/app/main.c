@@ -97,13 +97,15 @@ static void prvSetupHardware( void );
 /*-----------------------------------------------------------*/
 #include <app/include/i2c_task.h>
 #include <app/include/efpga_tests.h>
+#include <app/include/iot_task.h>
 
 #include "libs/cli/include/cli.h"
 #include "hal/include/hal_udma_i2cm_reg_defs.h"
 
+#include <string.h>
+
 char* SOFTWARE_VERSION_STR = "cli_test v0.2 - NoInt \n";
 extern const struct cli_cmd_entry my_main_menu[];
-
 
 int main(void)
 {
@@ -112,7 +114,9 @@ int main(void)
 	/* The mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is described at the top
 	of this file. */
 
-	CLI_start_task( my_main_menu );
+	xTaskCreate(iot_app, "iot",
+		    configMINIMAL_STACK_SIZE, NULL,
+			tskIDLE_PRIORITY+1, NULL);
 
 	/* Start the tasks and timer running. */
 	vTaskStartScheduler();

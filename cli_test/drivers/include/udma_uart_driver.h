@@ -29,9 +29,11 @@ typedef enum {
 
 uint16_t udma_uart_open (uint8_t uart_id, uint32_t xbaudrate);
 uint16_t udma_uart_close (uint8_t uart_id);
+uint16_t udma_uart_flush (uint8_t uart_id);
 uint16_t udma_uart_write(uint8_t uart_id, uint16_t write_len, uint8_t* write_buffer);
 uint16_t udma_uart_writeraw(uint8_t uart_id, uint16_t write_len, uint8_t* write_buffer);
 uint16_t udma_uart_read(uint8_t uart_id, uint16_t read_len, uint8_t* read_buffer);
+uint16_t udma_uart_read_mod(uint8_t uart_id, uint16_t read_len, uint8_t* read_buffer);
 uint16_t udma_uart_readraw(uint8_t uart_id, uint16_t read_len, uint8_t* read_buffer);
 uint8_t udma_uart_getchar(uint8_t uart_id);
 uint16_t udma_uart_control(uint8_t uart_id, udma_uart_control_type_t control_type, void* pparam);
