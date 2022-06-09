@@ -8,7 +8,66 @@
 #include <sys/unistd.h>
 
 static char thing_name[37] = {0};
+static char location[37] = {0};
 static uint8_t i2c_buffer[256] = {0};
+
+static int thing = 0;
+
+void set_location()
+{
+	if (strcmp("12d0cd37-803c-498a-983e-94f753731bd9", thing_name) == 0)
+		strcpy(location, "Xian");
+	else if (strcmp("ed60a105-57cd-4960-ba9a-76878974ef89", thing_name) == 0)
+		strcpy(location, "San Diego");
+	else if (strcmp("d7d1408e-09c9-47cf-a55f-adf9292f7684", thing_name) == 0)
+		strcpy(location, "Ottawa");
+	else if (strcmp("c360e34d-c356-4e24-af50-7ccd09866ead", thing_name) == 0)
+		strcpy(location, "Nurmberg");
+	else if (strcmp("67870924-1185-4acb-b8eb-3db3967be4ca", thing_name) == 0)
+		strcpy(location, "Zurich");
+	else if (strcmp("380ede96-0571-4f7e-b329-ad69ae3ef69e", thing_name) == 0)
+		strcpy(location, "Paris");
+	else if (strcmp("92bb486e-0a98-40a5-928a-9263ae5d26d2", thing_name) == 0)
+		strcpy(location, "Rome");
+	else if (strcmp("23d254d4-bc69-475f-8b7f-37fdddc8244a", thing_name) == 0)
+		strcpy(location, "London");
+	else if (strcmp("3e3c131d-6354-46d8-93c0-2bd687203258", thing_name) == 0)
+		strcpy(location, "New York");
+	else if (strcmp("3bcc439a-674e-4b49-aff6-1556558987ce", thing_name) == 0)
+		strcpy(location, "Havana");
+	else if (strcmp("5f14b489-95ae-455a-a8f2-a4e7a613dc8d", thing_name) == 0)
+		strcpy(location, "Munich");
+	else
+		strcpy(location, "Unknown");
+}
+
+void set_location_dummy()
+{
+	if (thing == 0)
+		strcpy(location, "Xian");
+	else if (thing == 1)
+		strcpy(location, "San Diego");
+	else if (thing == 2)
+		strcpy(location, "Ottawa");
+	else if (thing == 3)
+		strcpy(location, "Nurmberg");
+	else if (thing == 4)
+		strcpy(location, "Zurich");
+	else if (thing == 5)
+		strcpy(location, "Paris");
+	else if (thing == 6)
+		strcpy(location, "Rome");
+	else if (thing == 7)
+		strcpy(location, "London");
+	else if (thing == 8)
+		strcpy(location, "New York");
+	else if (thing == 9)
+		strcpy(location, "Havana");
+	else if (thing == 10)
+		strcpy(location, "Munich");
+	else
+		strcpy(location, "Unknown");
+}
 
 void busy_sleep(const unsigned int n)
 {
@@ -108,9 +167,9 @@ void at_send_measure()
 	temp = (i2c_buffer[0] << 8) + i2c_buffer[1];
 	tempi = (temp >> 7);
 	tempd = (temp & 0x7F) * 625;
-	CLI_printf("The temperature here is %d.%d C\r\n", tempi, tempd);
+	CLI_printf("The temperature here (%s) is %d.%d C\r\n", location, tempi, tempd);
 
-	sprintf(msg, "AT+SEND1 { \"id\" : \"%s\", \"num\" : %d.%d }\n", thing_name, tempi, tempd);
+	sprintf(msg, "AT+SEND1 { \"id\" : \"%s\", \"temp\" : %d.%d }\n", location, tempi, tempd);
     resp[0] = '\0';
 
 	udma_uart_flush(1);
@@ -130,11 +189,14 @@ void iot_app( void *pParameter )
 	while (1) {
 		at_check();
 		at_getthingname();
+		set_location();
 		at_set_topic();
 		while (1) {
 			at_connect();
 			at_send_measure();
 			busy_sleep(10);
+//			thing = (thing + 1) % 11;
+//			set_location_dummy();
 		}
 	}
 }
