@@ -129,6 +129,32 @@ void at_check()
 	CLI_printf("AT check done\r\n");
 }
 
+void at_set_wifi()
+{
+	char ssid[] = "AT+CONF SSID=mySSID\n";
+	char passwd[] = "AT+CONF Passphrase=myPassword\n";
+
+    char ok[] = "OK\n";
+    char resp[32];
+
+    resp[0] = '\0';
+
+    while (strncmp(resp, ok, sizeof(ok)-1)) {
+    	udma_uart_flush(1);
+    	udma_uart_writeraw(1, strlen(ssid), ssid);
+    	udma_uart_read_mod(1, sizeof(resp), resp);
+    }
+
+    resp[0] = '\0';
+
+    while (strncmp(resp, ok, sizeof(ok)-1)) {
+    	udma_uart_flush(1);
+    	udma_uart_writeraw(1, strlen(passwd), passwd);
+    	udma_uart_read_mod(1, sizeof(resp), resp);
+    }
+
+}
+
 void at_set_topic()
 {
     char root_topic[] = "AT+CONF Topicroot=test\n";
@@ -192,6 +218,7 @@ void iot_app( void *pParameter )
 		at_check();
 		at_getthingname();
 		set_location();
+//		at_set_wifi();
 		at_set_topic();
 		while (1) {
 			at_connect();
